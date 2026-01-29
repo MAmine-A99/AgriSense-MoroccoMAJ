@@ -1,13 +1,14 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import requests
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 import plotly.graph_objects as go
 from io import BytesIO
 from reportlab.pdfgen import canvas
 import qrcode
-import requests
+from PIL import Image
 
 # =====================================================
 # PAGE CONFIG & DESIGN
@@ -40,19 +41,19 @@ st.markdown("<p style='text-align:center;color:#6B8E23'>AI-powered sustainable a
 if "marker" not in st.session_state:
     st.session_state.marker = {"lat": 31.6295, "lon": -7.9811}  # Marrakech
 if "weather" not in st.session_state:
-    st.session_state.weather = {"temp": 25, "humidity": 50, "rain": 0}
-if "city_name" not in st.session_state:
-    st.session_state.city_name = "Unknown"
+    st.session_state.weather = {"temp": 25, "humidity": 50, "rain": 2}
 
 # =====================================================
 # SIDEBAR – REGION SELECTION
 # =====================================================
 st.sidebar.header("📍 Select Region (Morocco)")
+
 lat = st.sidebar.number_input("Latitude", 21.0, 36.0, st.session_state.marker["lat"])
 lon = st.sidebar.number_input("Longitude", -17.0, -1.0, st.session_state.marker["lon"])
 
 if st.sidebar.button("Set Region"):
     st.session_state.marker = {"lat": lat, "lon": lon}
+    st.session_state.weather = {"temp": 25, "humidity": 50, "rain": 2}
 
 lat, lon = st.session_state.marker["lat"], st.session_state.marker["lon"]
 
@@ -72,60 +73,43 @@ fig_map.update_layout(
 st.plotly_chart(fig_map, use_container_width=True)
 
 # =====================================================
-# WEATHER FETCH – Open-Meteo (Free)
+# REVERSE GEOCODING
 # =====================================================
-def fetch_open_meteo_weather(lat, lon):
-    try:
-        url = "https://api.open-meteo.com/v1/forecast"
-        params = {
-            "latitude": lat,
-            "longitude": lon,
-            "hourly": "temperature_2m,rain,relative_humidity_2m",
-            "current_weather": True,
-            "timezone": "auto"
-        }
-        response = requests.get(url, params=params, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+API_KEY = "be87b67bc35d53a2b6db5abe4f569460"
+city_name = "Unknown"
 
-        # Current temperature from current_weather
-        current_temp = data["current_weather"]["temperature"]
-        current_time = data["current_weather"]["time"]
-
-        # Find closest hourly index for humidity & rain
-        hourly_times = data["hourly"]["time"]
-        idx = min(range(len(hourly_times)), key=lambda i: abs(pd.to_datetime(hourly_times[i]) - pd.to_datetime(current_time)))
-
-        current_humidity = data["hourly"]["relative_humidity_2m"][idx]
-        current_rain = data["hourly"]["rain"][idx]
-
-        weather = {
-            "temp": current_temp,
-            "humidity": current_humidity,
-            "rain": current_rain
-        }
-
-        # City name as coordinates (replace with reverse geocoding if desired)
-        city_name = f"{lat:.2f},{lon:.2f}"
-
-        return weather, city_name
-
-    except Exception as e:
-        st.warning(f"Could not fetch weather, using last saved/demo data. Error: {e}")
-        return st.session_state.weather, st.session_state.city_name
-
-# Refresh button
-if st.sidebar.button("🔄 Refresh Weather"):
-    st.session_state.weather, st.session_state.city_name = fetch_open_meteo_weather(lat, lon)
-
-# Ensure weather variables are defined
-weather = st.session_state.get("weather", {"temp": 25, "humidity": 50, "rain": 0})
-temp = weather["temp"]
-humidity = weather["humidity"]
-rain = weather["rain"]
-city_name = st.session_state.get("city_name", "Unknown")
+try:
+    geo = requests.get(
+        f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={API_KEY}",
+        timeout=5
+    ).json()
+    if geo:
+        city_name = geo[0]["name"]
+except:
+    pass
 
 st.markdown(f"### 📌 Selected Area: **{city_name}** (Lat: {lat:.2f}, Lon: {lon:.2f})")
+
+# =====================================================
+# WEATHER FETCH
+# =====================================================
+if st.sidebar.button("🔄 Refresh Weather"):
+    try:
+        weather = requests.get(
+            f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={API_KEY}",
+            timeout=5
+        ).json()
+        st.session_state.weather = {
+            "temp": weather["main"]["temp"],
+            "humidity": weather["main"]["humidity"],
+            "rain": weather.get("rain", {}).get("1h", np.random.uniform(0, 6))
+        }
+    except:
+        st.warning("Using demo weather data")
+
+temp = st.session_state.weather["temp"]
+humidity = st.session_state.weather["humidity"]
+rain = st.session_state.weather["rain"]
 
 # =====================================================
 # NDVI (SIMULATED)
@@ -236,7 +220,7 @@ if st.button("📄 Export PDF Report"):
 # =====================================================
 # QR CODE FOR APP
 # =====================================================
-APP_URL = "https://agrisense-moroccomaj-nngj5uc898kzkk7ae4j9go.streamlit.app/"
+APP_URL = "https://agrisense-moroccomaj-nngj5uc898kzkk7ae4j9go.streamlit.app/"  # replace with your actual URL
 qr = qrcode.QRCode(version=1, box_size=12, border=8)
 qr.add_data(APP_URL)
 qr.make(fit=True)
