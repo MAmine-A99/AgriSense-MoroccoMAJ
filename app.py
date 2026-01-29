@@ -73,7 +73,7 @@ st.plotly_chart(fig_map, use_container_width=True)
 # =====================================================
 # WEATHER FETCH – Open-Meteo
 # =====================================================
-import requests
+import datetime
 
 def fetch_open_meteo_weather(lat, lon):
     try:
@@ -89,30 +89,32 @@ def fetch_open_meteo_weather(lat, lon):
         response.raise_for_status()
         data = response.json()
 
-        current = data.get("current_weather", {})
+        # Current temperature from current_weather
+        current_temp = data["current_weather"]["temperature"]
+
+        # Find closest hourly time to now for humidity & rain
+        now_str = data["current_weather"]["time"]
+        hourly_times = data["hourly"]["time"]
+        idx = min(range(len(hourly_times)), key=lambda i: abs(pd.to_datetime(hourly_times[i]) - pd.to_datetime(now_str)))
+
+        current_humidity = data["hourly"]["relative_humidity_2m"][idx]
+        current_rain = data["hourly"]["rain"][idx]
+
         weather = {
-            "temp": current.get("temperature", 0),
-            "humidity": current.get("relativehumidity", 0),  # sometimes absent, handled below
-            "rain": current.get("precipitation", 0)
+            "temp": current_temp,
+            "humidity": current_humidity,
+            "rain": current_rain
         }
 
-        # Set city name to coordinates (lat, lon)
+        # Set city name as coordinates (or improve later with reverse geocoding)
         city_name = f"{lat:.2f},{lon:.2f}"
 
         return weather, city_name
+
     except Exception as e:
         st.warning(f"Could not fetch weather, using last saved/demo data. Error: {e}")
         return st.session_state.weather, st.session_state.city_name
 
-if st.sidebar.button("🔄 Refresh Weather"):
-    st.session_state.weather, st.session_state.city_name = fetch_open_meteo_weather(lat, lon)
-
-temp = st.session_state.weather["temp"]
-humidity = st.session_state.weather["humidity"]
-rain = st.session_state.weather["rain"]
-city_name = st.session_state.city_name
-
-st.markdown(f"### 📌 Selected Area: **{city_name}** (Lat: {lat:.2f}, Lon: {lon:.2f})")
 
 # =====================================================
 # NDVI (SIMULATED)
@@ -239,3 +241,4 @@ st.image(buf_qr, width=180)
 # FOOTER
 # =====================================================
 st.markdown("<p style='text-align:center;color:#6B8E23'>Powered by : Mohamed Amine Jaghouti</p>", unsafe_allow_html=True)
+
