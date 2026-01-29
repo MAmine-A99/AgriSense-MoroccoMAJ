@@ -220,8 +220,8 @@ if st.button("📄 Export PDF Report"):
 # =====================================================
 # QR CODE FOR APP
 # =====================================================
-APP_URL = "https://your-deployed-streamlit-url.streamlit.app"  # replace with your actual URL
-qr = qrcode.QRCode(version=1, box_size=8, border=4)
+APP_URL = "https://agrisense-moroccomaj-nngj5uc898kzkk7ae4j9go.streamlit.app/"  # replace with your actual URL
+qr = qrcode.QRCode(version=1, box_size=12, border=8)
 qr.add_data(APP_URL)
 qr.make(fit=True)
 img_qr = qr.make_image(fill_color="black", back_color="white")
@@ -236,3 +236,4 @@ st.image(buf_qr, width=180)
 # FOOTER
 # =====================================================
 st.markdown("<p style='text-align:center;color:#6B8E23'>Powered by : Mohamed Amine Jaghouti</p>", unsafe_allow_html=True)
+
