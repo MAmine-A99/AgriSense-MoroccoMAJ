@@ -91,25 +91,24 @@ except:
 st.markdown(f"### 📌 Selected Area: **{city_name}** (Lat: {lat:.2f}, Lon: {lon:.2f})")
 
 # =====================================================
-# WEATHER FETCH
+# WEATHER FETCH – Visual Crossing
 # =====================================================
+VC_API_KEY = "YOUR_VISUAL_CROSSING_KEY"  # ← replace with your Visual Crossing API key
+
 if st.sidebar.button("🔄 Refresh Weather"):
     try:
-        weather = requests.get(
-            f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={API_KEY}",
-            timeout=5
-        ).json()
-        st.session_state.weather = {
-            "temp": weather["main"]["temp"],
-            "humidity": weather["main"]["humidity"],
-            "rain": weather.get("rain", {}).get("1h", np.random.uniform(0, 6))
-        }
-    except:
-        st.warning("Using demo weather data")
+        # Fetch current weather from Visual Crossing
+        url = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat},{lon}?unitGroup=metric&key={VC_API_KEY}&include=current"
+        weather_vc = requests.get(url, timeout=10).json()
 
-temp = st.session_state.weather["temp"]
-humidity = st.session_state.weather["humidity"]
-rain = st.session_state.weather["rain"]
+        current = weather_vc["currentConditions"]
+        st.session_state.weather = {
+            "temp": current["temp"],
+            "humidity": current["humidity"],
+            "rain": current.get("precip", 0)  # precipitation in mm
+        }
+    except Exception as e:
+        st.warning(f"Could not fetch weather, using last saved/demo data. Error: {e}")
 
 # =====================================================
 # NDVI (SIMULATED)
@@ -236,4 +235,5 @@ st.image(buf_qr, width=180)
 # FOOTER
 # =====================================================
 st.markdown("<p style='text-align:center;color:#6B8E23'>Powered by : Mohamed Amine Jaghouti</p>", unsafe_allow_html=True)
+
 
