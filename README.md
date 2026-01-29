@@ -1,182 +1,98 @@
+🌱 AgriSense Morocco
 
-```markdown
-# 🌱 AgriSense Morocco
-### AI-Powered Smart Agriculture Platform 🇲🇦
+AI-Powered Smart Agriculture Decision Support System
 
-AgriSense Morocco is an **intelligent decision-support platform for agriculture**, designed to help farmers, students, and researchers choose the **right crop** and **optimal irrigation strategy** based on **geolocation, real-time weather, and AI predictions**.
+AgriSense Morocco is an interactive web application that uses environmental data and machine learning to support sustainable agricultural decision-making in Morocco. It helps farmers, students, and decision-makers identify suitable crops, irrigation needs, and climate risks through a simple visual dashboard.
 
-This project focuses on **Morocco’s climate and agricultural context**, combining **machine learning**, **geospatial data**, and **interactive analytics** into a modern web application.
+🎯 Objectives
 
----
+Support sustainable agriculture and food security
 
-## 🌍 Why AgriSense?
+Use AI and environmental indicators to guide crop selection
 
-Agriculture in Morocco faces:
-- Climate variability 🌡️  
-- Water scarcity 💧  
-- Crop selection uncertainty 🌾  
+Provide accessible decision support for non-technical users
 
-AgriSense transforms **raw environmental data** into **clear, actionable insights** using artificial intelligence.
+Demonstrate real-world AI application in agriculture
 
----
+🧠 How It Works
 
-## ✨ Key Features
+User selects a location in Morocco (map or coordinates)
 
-### 📍 Location Intelligence
-- Interactive map or GPS coordinates
-- Works across all Moroccan regions
-- Reverse geocoding for city detection
+Real-time weather data is fetched (temperature, humidity, rainfall)
 
-### ☁️ Real-Time Weather Analysis
-- Live temperature, rainfall, and humidity
-- OpenWeather API integration
-- Automatic fallback to demo data
+Vegetation health is estimated using a simulated NDVI indicator
 
-### 🤖 AI Decision Engine
-- Machine Learning using **Random Forest**
-- Crop suitability prediction
-- Irrigation level optimization
+A machine-learning model analyzes the data
 
-### 📊 Visual Analytics
-- Crop probability bar charts
-- Intuitive dashboard metrics
-- NDVI-based vegetation insight (simulated)
+The app recommends:
 
-### 🔄 What-If Simulation
-- Analyze impact of rainfall variation
-- Compare AI recommendations dynamically
+Best-suited crop
 
-### 📄 Smart Reporting
-- One-click **PDF export**
-- Location-specific agronomic summary
-- Shareable for academic or professional use
+Irrigation level
 
-### 📱 QR-Code Friendly
-- Web-based
-- Accessible from any device
-- Ideal for demos & presentations
+Risk awareness through visual indicators
 
----
+🛠️ Technologies Used
 
-## 🧠 AI & Data Pipeline
+Python 3.11
 
-**Inputs**
-- Latitude / Longitude
-- Temperature
-- Rainfall
-- Humidity
-- NDVI (simulated)
+Streamlit – interactive web app
 
-**Models**
-- RandomForestClassifier (Scikit-Learn)
+Scikit-learn – machine learning (Random Forest)
 
-**Outputs**
-- 🌾 Recommended Crop
-- 💧 Irrigation Level (Low / Medium / High)
-- 📊 Probability Distribution
+Pandas & NumPy – data processing
 
-> This project prioritizes explainability and educational value over black-box predictions.
+Plotly – interactive charts & maps
 
----
+OpenWeatherMap API – real-time weather data
 
-## 🛠️ Tech Stack
+ReportLab – PDF export
 
-| Layer | Technology |
-|------|-----------|
-| Frontend | Streamlit |
-| Backend | Python 3.11 |
-| ML | Scikit-learn |
-| Data | Pandas, NumPy |
-| Visualization | Plotly |
-| Weather API | OpenWeather |
-| Reports | ReportLab (PDF) |
-| Deployment | Streamlit Cloud |
+📊 Features
 
----
+Interactive map (Morocco-focused)
 
-## 📁 Project Structure
+Real-time weather integration
 
-```
+AI-based crop and irrigation prediction
 
-AgriSense-Morocco/
-│
-├── app.py               # Streamlit main app
-├── requirements.txt     # Dependencies
-└── README.md            # Documentation
+NDVI-based vegetation insight
 
-````
+What-if climate scenario analysis
 
----
+Downloadable PDF report
 
-## ⚙️ Local Installation
+Simple UI designed for accessibility
 
-```bash
-git clone https://github.com/MAmine-A99/AgriSense-Morocco.git
-cd AgriSense-Morocco
+🌍 Sustainability & Food Security
+
+AgriSense Morocco contributes to climate-smart agriculture, helping optimize resource use, reduce water waste, and improve crop resilience—supporting long-term sustainability and food security goals.
+
+🚀 How to Run Locally
 pip install -r requirements.txt
 streamlit run app.py
-````
 
----
+🌐 Live Demo
 
-## ☁️ Deployment
+👉 (Streamlit Cloud URL goes here)
+Scan the QR code to access the app on mobile.
 
-* Deployed using **Streamlit Cloud**
-* No server configuration required
-* Continuous deployment from GitHub
+📁 Project Structure
+AgriSense-Morocco/
+│── app.py
+│── requirements.txt
+│── README.md
 
----
+📚 References
 
-## 🎓 Target Use Cases
+Pettorelli, N. (2013). The Normalized Difference Vegetation Index. Oxford University Press.
 
-* AI & Data Science portfolios
-* Engineering school applications
-* Agricultural innovation projects
-* Smart farming prototypes
-* Hackathons & research demos
+Liakos, K. G., et al. (2018). Machine learning in agriculture. Computers and Electronics in Agriculture.
 
----
+Lobell, D. B., & Burke, M. B. (2010). Climate change and crop yield models. Agricultural and Forest Meteorology.
 
-## 🔮 Future Enhancements
+👤 Author
 
-* 🛰️ Real satellite NDVI (Sentinel-2)
-* 🌱 Soil type & fertility integration
-* 📡 IoT sensor support
-* 🌍 Climate-change scenario modeling
-* 🇲🇦 Arabic / French multilingual UI
-* 📲 SMS & WhatsApp farmer alerts
-
----
-
-## 👤 Author
-
-**Mohamed Amine Jaghouti**
+Mohamed Amine Jaghouti
 AI & Digital Engineering Student
-Morocco 🇲🇦
-
-> Passionate about AI, sustainability, and real-world impact.
-
----
-
-## 📜 License
-
-This project is open for **educational and research purposes**.
-For commercial use, please contact the author.
-
----
-
-🌱 *AgriSense Morocco — Turning Data into Smarter Farming Decisions.*
-
-```
-
----
-
-If you want, next I can:
-- 🔥 Add **badges** (Python, Streamlit, AI, Morocco)
-- 🌐 Write a **startup-style pitch**
-- 📈 Prepare this for **Polytech / IDIA / alternance dossiers**
-- 🎥 Create a **demo video script**
-
-Just tell me what’s next 😎
-::contentReference[oaicite:0]{index=0}
-```
+Project developed for academic, innovation, and hackathon purposes.
