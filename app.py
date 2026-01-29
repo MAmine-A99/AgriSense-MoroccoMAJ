@@ -1,14 +1,12 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import requests
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 import plotly.graph_objects as go
 from io import BytesIO
 from reportlab.pdfgen import canvas
 import qrcode
-from PIL import Image
 
 # =====================================================
 # PAGE CONFIG & DESIGN
@@ -49,7 +47,6 @@ if "city_name" not in st.session_state:
 # SIDEBAR – REGION SELECTION
 # =====================================================
 st.sidebar.header("📍 Select Region (Morocco)")
-
 lat = st.sidebar.number_input("Latitude", 21.0, 36.0, st.session_state.marker["lat"])
 lon = st.sidebar.number_input("Longitude", -17.0, -1.0, st.session_state.marker["lon"])
 
@@ -74,44 +71,48 @@ fig_map.update_layout(
 st.plotly_chart(fig_map, use_container_width=True)
 
 # =====================================================
-# WEATHER FETCH – Visual Crossing
+# WEATHER FETCH – Open-Meteo
 # =====================================================
-VC_API_KEY = "YOUR_VISUAL_CROSSING_KEY"
+import requests
 
-if st.sidebar.button("🔄 Refresh Weather"):
+def fetch_open_meteo_weather(lat, lon):
     try:
-        # Format lat/lon properly
-        location = f"{lat},{lon}"
+        url = "https://api.open-meteo.com/v1/forecast"
+        params = {
+            "latitude": lat,
+            "longitude": lon,
+            "hourly": "temperature_2m,rain,relative_humidity_2m",
+            "current_weather": True,
+            "timezone": "auto"
+        }
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
 
-        url = (
-            f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/"
-            f"{location}?unitGroup=metric&key={VC_API_KEY}&include=current"
-        )
-
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()  # <-- ensures HTTP errors raise exceptions
-
-        weather_vc = response.json()  # <-- parse JSON safely
-        current = weather_vc.get("currentConditions", {})
-
-        st.session_state.weather = {
-            "temp": current.get("temp", 0),
-            "humidity": current.get("humidity", 0),
-            "rain": current.get("precip", 0)
+        current = data.get("current_weather", {})
+        weather = {
+            "temp": current.get("temperature", 0),
+            "humidity": current.get("relativehumidity", 0),  # sometimes absent, handled below
+            "rain": current.get("precipitation", 0)
         }
 
-        # Update city name
-        st.session_state.city_name = weather_vc.get("resolvedAddress", "Unknown").split(",")[0]
+        # Set city name to coordinates (lat, lon)
+        city_name = f"{lat:.2f},{lon:.2f}"
 
-    except requests.exceptions.HTTPError as http_err:
-        st.warning(f"HTTP error: {http_err}")
-    except requests.exceptions.ConnectionError:
-        st.warning("Connection error. Check your internet.")
-    except ValueError:
-        st.warning("Received invalid response from Visual Crossing API.")
+        return weather, city_name
     except Exception as e:
         st.warning(f"Could not fetch weather, using last saved/demo data. Error: {e}")
+        return st.session_state.weather, st.session_state.city_name
 
+if st.sidebar.button("🔄 Refresh Weather"):
+    st.session_state.weather, st.session_state.city_name = fetch_open_meteo_weather(lat, lon)
+
+temp = st.session_state.weather["temp"]
+humidity = st.session_state.weather["humidity"]
+rain = st.session_state.weather["rain"]
+city_name = st.session_state.city_name
+
+st.markdown(f"### 📌 Selected Area: **{city_name}** (Lat: {lat:.2f}, Lon: {lon:.2f})")
 
 # =====================================================
 # NDVI (SIMULATED)
@@ -238,4 +239,3 @@ st.image(buf_qr, width=180)
 # FOOTER
 # =====================================================
 st.markdown("<p style='text-align:center;color:#6B8E23'>Powered by : Mohamed Amine Jaghouti</p>", unsafe_allow_html=True)
-
