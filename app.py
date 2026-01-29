@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from io import BytesIO
 from reportlab.pdfgen import canvas
 import qrcode
+import requests
 
 # =====================================================
 # PAGE CONFIG & DESIGN
@@ -71,10 +72,8 @@ fig_map.update_layout(
 st.plotly_chart(fig_map, use_container_width=True)
 
 # =====================================================
-# WEATHER FETCH – Open-Meteo
+# WEATHER FETCH – Open-Meteo (Free)
 # =====================================================
-import datetime
-
 def fetch_open_meteo_weather(lat, lon):
     try:
         url = "https://api.open-meteo.com/v1/forecast"
@@ -91,11 +90,11 @@ def fetch_open_meteo_weather(lat, lon):
 
         # Current temperature from current_weather
         current_temp = data["current_weather"]["temperature"]
+        current_time = data["current_weather"]["time"]
 
-        # Find closest hourly time to now for humidity & rain
-        now_str = data["current_weather"]["time"]
+        # Find closest hourly index for humidity & rain
         hourly_times = data["hourly"]["time"]
-        idx = min(range(len(hourly_times)), key=lambda i: abs(pd.to_datetime(hourly_times[i]) - pd.to_datetime(now_str)))
+        idx = min(range(len(hourly_times)), key=lambda i: abs(pd.to_datetime(hourly_times[i]) - pd.to_datetime(current_time)))
 
         current_humidity = data["hourly"]["relative_humidity_2m"][idx]
         current_rain = data["hourly"]["rain"][idx]
@@ -106,7 +105,7 @@ def fetch_open_meteo_weather(lat, lon):
             "rain": current_rain
         }
 
-        # Set city name as coordinates (or improve later with reverse geocoding)
+        # City name as coordinates (replace with reverse geocoding if desired)
         city_name = f"{lat:.2f},{lon:.2f}"
 
         return weather, city_name
@@ -115,6 +114,18 @@ def fetch_open_meteo_weather(lat, lon):
         st.warning(f"Could not fetch weather, using last saved/demo data. Error: {e}")
         return st.session_state.weather, st.session_state.city_name
 
+# Refresh button
+if st.sidebar.button("🔄 Refresh Weather"):
+    st.session_state.weather, st.session_state.city_name = fetch_open_meteo_weather(lat, lon)
+
+# Ensure weather variables are defined
+weather = st.session_state.get("weather", {"temp": 25, "humidity": 50, "rain": 0})
+temp = weather["temp"]
+humidity = weather["humidity"]
+rain = weather["rain"]
+city_name = st.session_state.get("city_name", "Unknown")
+
+st.markdown(f"### 📌 Selected Area: **{city_name}** (Lat: {lat:.2f}, Lon: {lon:.2f})")
 
 # =====================================================
 # NDVI (SIMULATED)
@@ -241,4 +252,3 @@ st.image(buf_qr, width=180)
 # FOOTER
 # =====================================================
 st.markdown("<p style='text-align:center;color:#6B8E23'>Powered by : Mohamed Amine Jaghouti</p>", unsafe_allow_html=True)
-
