@@ -1,4 +1,4 @@
-import streamlit as st 
+import streamlit as st  
 import pandas as pd
 import numpy as np
 import requests
@@ -15,10 +15,16 @@ import qrcode
 st.set_page_config(page_title="AgriSense Morocco", layout="wide", page_icon="🌱")
 
 # =====================================================
-# GLOBAL STYLE
+# GLOBAL STYLE (iPhone / San Francisco font)
 # =====================================================
 st.markdown("""
 <style>
+/* iPhone / San Francisco font for all text */
+body, h1, h2, h3, h4, h5, h6, p, div {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Buttons */
 .stButton>button {
     border-radius: 14px;
     background-color:#D97706;
@@ -27,6 +33,8 @@ st.markdown("""
     width:100%;
     font-size:18px;
 }
+
+/* Metrics cards */
 .metric-card {
     border-radius: 14px;
     padding: 20px;
@@ -93,9 +101,10 @@ def intro_page():
             st.rerun()
     
     st.markdown("<p style='text-align:center;color:#6B8E23;'>Powered by Mohamed Amine Jaghouti</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center;color:#555555;'>Email: Mohamedaminejaghouti@gmail.com</p>", unsafe_allow_html=True)
 
 # =====================================================
-# DASHBOARD PAGE
+# DASHBOARD PAGE (unchanged)
 # =====================================================
 def dashboard_page():
     st.sidebar.title("📍 Select Region (Morocco)")
@@ -113,7 +122,7 @@ def dashboard_page():
     
     lat, lon = st.session_state.marker["lat"], st.session_state.marker["lon"]
     
-    # ---------------- MAP ----------------
+    # Map
     map_df = pd.DataFrame([{"lat": lat, "lon": lon}])
     fig_map = go.Figure(go.Scattermapbox(
         lat=map_df["lat"], lon=map_df["lon"],
@@ -125,7 +134,7 @@ def dashboard_page():
                           margin=dict(l=0, r=0, t=0, b=0), height=420)
     st.plotly_chart(fig_map, use_container_width=True)
     
-    # ---------------- WEATHER ----------------
+    # Weather & city
     API_KEY = "be87b67bc35d53a2b6db5abe4f569460"
     city_name = "Unknown"
     try:
@@ -153,7 +162,7 @@ def dashboard_page():
     rain = st.session_state.weather["rain"]
     ndvi = float(np.clip(np.random.normal(0.55, 0.1), 0.2, 0.85))
     
-    # ---------------- AI MODELS ----------------
+    # AI Models
     crops = ["wheat","olives","tomatoes","citrus","grapes","almonds","vegetables"]
     irrigation = ["low","low","high","medium","medium","low","high"]
     
@@ -181,7 +190,7 @@ def dashboard_page():
     irr_pred = irr_enc.inverse_transform(irr_model.predict(X_input))[0]
     probs = crop_model.predict_proba(X_input)[0]
     
-    # ---------------- METRICS + ALERTS ----------------
+    # Metrics + Alerts
     c1,c2,c3,c4 = st.columns(4)
     c1.metric("🌡 Temperature", f"{temp:.1f} °C")
     c2.metric("🌧 Rainfall", f"{rain:.1f} mm")
@@ -191,7 +200,6 @@ def dashboard_page():
     st.success(f"🌾 Recommended Crop: **{crop_pred.capitalize()}**")
     st.info(f"💦 Irrigation Level: **{irr_pred.capitalize()}**")
     
-    # Alerts
     alert_text = ""
     if rain < 2:
         alert_text += "⚠️ Drought risk detected. "
@@ -202,12 +210,12 @@ def dashboard_page():
     if alert_text:
         st.warning(alert_text)
     
-    # ---------------- CHART ----------------
+    # Chart
     fig = go.Figure(go.Bar(x=crop_enc.classes_, y=probs, marker_color="#6B8E23"))
     fig.update_layout(title="Crop Suitability Probabilities")
     st.plotly_chart(fig, use_container_width=True)
     
-    # ---------------- PDF ----------------
+    # PDF
     def generate_pdf():
         buffer = BytesIO()
         c = canvas.Canvas(buffer)
@@ -231,7 +239,7 @@ def dashboard_page():
                            file_name=f"AgriSense_{city_name}.pdf",
                            mime="application/pdf")
     
-    # ---------------- QR ----------------
+    # QR
     APP_URL = "https://agrisense-moroccomaj-nngj5uc898kzkk7ae4j9go.streamlit.app/"
     qr = qrcode.make(APP_URL)
     buf = BytesIO()
