@@ -17,13 +17,7 @@ st.set_page_config(page_title="AgriSense Morocco", layout="wide", page_icon="�
 # =====================================================
 # GLOBAL STYLE (iPhone / San Francisco font)
 # =====================================================
-st.markdown("""
-<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-<h1 style='text-align:center; color:#D97706; font-size:50px;'>🌱 AgriSense Morocco</h1>
-<h3 style='text-align:center; color:#6B8E23;'>AI-powered Sustainable Agriculture Decision Support</h3>
-<p style='text-align:center;'>Powered by Mohamed Amine Jaghouti<br>Mohamedaminejaghouti@gmail.com</p>
-</div>
-""", unsafe_allow_html=True)
+
 
 st.markdown("""
 <style>
@@ -75,7 +69,13 @@ def intro_page():
     st.markdown("<br>", unsafe_allow_html=True)
     
     # Hero title + subtitle
-    st.markdown("<h1 style='text-align:center; color:#D97706; font-size:50px;'>🌱 AgriSense Morocco</h1>", unsafe_allow_html=True)
+st.markdown("""
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<h1 style='text-align:center; color:#D97706; font-size:50px;'>🌱 AgriSense Morocco</h1>
+<h3 style='text-align:center; color:#6B8E23;'>AI-powered Sustainable Agriculture Decision Support</h3>
+<p style='text-align:center;'>Powered by Mohamed Amine Jaghouti<br>Mohamedaminejaghouti@gmail.com</p>
+</div>
+""", unsafe_allow_html=True)
     st.markdown("<h3 style='text-align:center; color:#6B8E23;'>AI-powered Sustainable Agriculture Decision Support</h3>", unsafe_allow_html=True)
     st.markdown("---")
     
@@ -266,6 +266,7 @@ if st.session_state.page=="intro":
     intro_page()
 else:
     dashboard_page()
+
 
 
 
