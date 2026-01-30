@@ -106,12 +106,14 @@ def intro_page():
             st.session_state.page = "dashboard"
             st.rerun()
 
-    st.markdown(
-        "<p style='text-align:center;color:#6B8E23'>Powered by Mohamed Amine Jaghouti</p>",
-        unsafe_allow_html=True
-    )
+    pdf_link = "https://drive.google.com/file/d/FILE_ID/view?usp=sharing"
 
+st.markdown(
+    f"📄 **[AgriSense Morocco – Project Overview (PDF)]({pdf_link})**",
+    unsafe_allow_html=True
+)
 
+  
 # =====================================================
 # DASHBOARD PAGE (YOUR ORIGINAL APP)
 # =====================================================
@@ -269,6 +271,7 @@ if st.session_state.page == "intro":
     intro_page()
 else:
     dashboard_page()
+
 
 
 
