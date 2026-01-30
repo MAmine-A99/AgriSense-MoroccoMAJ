@@ -93,18 +93,20 @@ def intro_page():
         )
 
 
-    with col2:
+   with col2:
     st.markdown("### 📄 Project Documentation")
 
     st.write(
         "Access the full concept, architecture, and vision behind AgriSense Morocco:"
     )
 
-    st.link_button(
-        "📘 AgriSense Morocco – Project Overview (PDF)",
-        "https://drive.google.com/file/d/1F8USlTvi2hP01RwpBTJNaTIczRovVlLU/view?usp=sharing"
-    
+    st.markdown(
+        "[📘 AgriSense Morocco – Project Overview (PDF)](https://drive.google.com/uc?export=download&id=1F8USlTvi2hP01RwpBTJNaTIczRovVlLU)",
+        unsafe_allow_html=True
+    )
+
     st.markdown("---")
+
 
     col_btn = st.columns(3)[1]
     with col_btn:
@@ -275,5 +277,6 @@ if st.session_state.page == "intro":
     intro_page()
 else:
     dashboard_page()
+
 
 
