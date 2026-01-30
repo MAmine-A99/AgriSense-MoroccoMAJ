@@ -17,6 +17,10 @@ st.set_page_config(page_title="AgriSense Morocco", layout="wide", page_icon="ðŸŒ
 # =====================================================
 # GLOBAL STYLE (iPhone / San Francisco font)
 # =====================================================
+st.write("This text should now be in iPhone / San Francisco font")
+st.metric("Test Metric", "123")
+st.button("Test Button")
+
 st.markdown("""
 <style>
 /* iPhone / San Francisco font for all text */
@@ -255,4 +259,5 @@ if st.session_state.page=="intro":
     intro_page()
 else:
     dashboard_page()
+
 
