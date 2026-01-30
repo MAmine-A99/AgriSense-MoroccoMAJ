@@ -99,12 +99,17 @@ def intro_page():
 
    st.markdown("<br><br>", unsafe_allow_html=True)
 
-   col_left, col_center, col_right = st.columns([1, 2, 1])
+   def intro_page():
 
-   with col_center:
-     if st.button("🚀 LET’S EXPLORE AGRISENSE", key="explore_btn"):
-        st.session_state.page = "dashboard"
-        st.rerun()
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    col_left, col_center, col_right = st.columns([1, 2, 1])
+
+    with col_center:
+        if st.button("🚀 LET’S EXPLORE AGRISENSE", key="explore_btn"):
+            st.session_state.page = "dashboard"
+            st.rerun()
+
 
     st.markdown(
         "<p style='text-align:center;color:#6B8E23'>Powered by Mohamed Amine Jaghouti</p>",
@@ -239,5 +244,6 @@ if st.session_state.page == "intro":
     intro_page()
 else:
     dashboard_page()
+
 
 
