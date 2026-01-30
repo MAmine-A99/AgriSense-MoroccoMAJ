@@ -9,100 +9,67 @@ from io import BytesIO
 from reportlab.pdfgen import canvas
 import qrcode
 
-# =====================================================
+# -----------------------------
 # PAGE CONFIG
-# =====================================================
-st.set_page_config(page_title="AgriSense Morocco", layout="wide", page_icon="🌱")
+# -----------------------------
+st.set_page_config(
+    page_title="AgriSense Morocco",
+    page_icon="🌍",
+    layout="wide"
+)
 
-# =====================================================
-# GLOBAL STYLE
-# =====================================================
-st.markdown("""
-<style>
-.stButton>button {
-    border-radius: 14px;
-    background-color:#D97706;
-    color:white;
-    height:42px;
-    width:100%;
-}
-.metric-card {
-    border-radius: 14px;
-    padding: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-</style>
-""", unsafe_allow_html=True)
-
-# =====================================================
-# SESSION STATE – PAGE ROUTER
-# =====================================================
+# -----------------------------
+# SESSION STATE
+# -----------------------------
 if "page" not in st.session_state:
     st.session_state.page = "intro"
 
-if "marker" not in st.session_state:
-    st.session_state.marker = {"lat": 31.6295, "lon": -7.9811}
 
-if "weather" not in st.session_state:
-    st.session_state.weather = {"temp": 25, "humidity": 50, "rain": 2}
-
-# =====================================================
-# INTRO / PRESENTATION PAGE
-# =====================================================
+# -----------------------------
+# INTRO PAGE
+# -----------------------------
 def intro_page():
 
-    st.markdown("<h1 style='text-align:center;color:#D97706'>🌱 AgriSense Morocco</h1>", unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # TITLE
     st.markdown(
-        "<h3 style='text-align:center;color:#6B8E23'>AI-powered sustainable agriculture decision support</h3>",
+        "<h1 style='text-align:center;'>🌱 AgriSense Morocco</h1>",
         unsafe_allow_html=True
     )
 
-    st.markdown("---")
+    st.markdown(
+        "<h4 style='text-align:center; color: grey;'>Smart Agriculture • AI • Sustainability</h4>",
+        unsafe_allow_html=True
+    )
 
-    col1, col2 = st.columns([1.3, 1])
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    with col1:
-        st.markdown("### 🚜 About the Company & Idea")
-        st.write("""
-        **AgriSense Morocco** is an intelligent agricultural decision-support platform
-        designed for the Moroccan ecosystem.
+    # OPTIONAL IMAGE (LOCAL OR URL)
+    # Local: images/hero.jpg
+    # URL: https://...
+    st.image(
+        "https://images.unsplash.com/photo-1501004318641-b39e6451bec6",
+        use_container_width=True
+    )
 
-        It combines **climate data, geospatial analytics, vegetation indices (NDVI)** 
-        and **machine learning models** to assist farmers, cooperatives, and institutions
-        in choosing optimal crops, irrigation strategies, and sustainable practices.
-        """)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-        st.markdown("### 🤖 Powered by")
-        st.write("""
-        - Machine Learning & AI Embedded Systems (Random Forest Models)  
-        - Climate & Weather APIs  
-        - Geospatial Mapping (OpenStreetMap)  
-        - Sustainable Agriculture Indicators  
-        """)
+    # DESCRIPTION
+    st.markdown(
+        """
+        **AgriSense Morocco** is an AI-powered decision-support platform designed to help
+        farmers, cooperatives, and institutions monitor crops, anticipate climate risks,
+        and optimize agricultural productivity across Morocco.
 
-        st.markdown("### 🎯 Vision")
-        st.write("""
-        Enable **data-driven agriculture in Morocco**, improving productivity
-        while preserving water resources and environmental balance.
-        """)
-
-    with col2:
-        st.markdown("### 📄 Project Documentation")
-        st.write("Access the full concept, architecture, and vision behind AgriSense Morocco:")
-
-        st.link_button(
-            "📘 AgriSense Morocco – Project Overview (PDF)",
-            "https://drive.google.com/file/d/1F8USlTvi2hP01RwpBTJNaTIczRovVlLU/view?usp=sharing"
-        )
-
-    st.markdown("---")
-
-   st.markdown("<br><br>", unsafe_allow_html=True)
-
-   def intro_page():
+        By combining **geospatial data, climate intelligence, and predictive analytics**,
+        AgriSense transforms raw environmental data into actionable insights.
+        """
+    )
 
     st.markdown("<br><br>", unsafe_allow_html=True)
 
+    # BIG CTA BUTTON (FIXED)
     col_left, col_center, col_right = st.columns([1, 2, 1])
 
     with col_center:
@@ -110,11 +77,14 @@ def intro_page():
             st.session_state.page = "dashboard"
             st.rerun()
 
+    # FOOTER (PLACED LOWER)
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
 
     st.markdown(
-        "<p style='text-align:center;color:#6B8E23'>Powered by Mohamed Amine Jaghouti</p>",
+        "<p style='text-align:center; color: grey;'>Powered by Mohamed • AI for Sustainable Agriculture</p>",
         unsafe_allow_html=True
     )
+
 
 # =====================================================
 # DASHBOARD PAGE
@@ -244,6 +214,7 @@ if st.session_state.page == "intro":
     intro_page()
 else:
     dashboard_page()
+
 
 
 
