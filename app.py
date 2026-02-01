@@ -4,6 +4,10 @@ import numpy as np
 import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
+import folium
+from streamlit_folium import st_folium
+from fpdf import FPDF
+import qrcode
 
 # =====================================================
 # PAGE CONFIG
@@ -30,9 +34,6 @@ st.markdown("""
     background-color: #D97706;
     color: white;
 }
-.metric {
-    text-align:center;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -42,21 +43,35 @@ st.markdown("""
 if "page" not in st.session_state:
     st.session_state.page = "intro"
 
+if "refresh_weather" not in st.session_state:
+    st.session_state.refresh_weather = 0
+
+if "refresh_ndvi" not in st.session_state:
+    st.session_state.refresh_ndvi = 0
+
 # =====================================================
 # INTRO PAGE
 # =====================================================
 def intro_page():
-    st.markdown("<br>", unsafe_allow_html=True)
 
     st.markdown("""
     <h1 style='text-align:center; color:#D97706;'>🌱 AgriSense Morocco</h1>
     <h3 style='text-align:center; color:#6B8E23;'>
     AI-Driven Decision Support for Sustainable Agriculture
     </h3>
-    <p style='text-align:center; font-size:16px;'>
-    Designed for Morocco • Climate-Aware • Data-Driven
-    </p>
     """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # 📘 Documentation
+    with st.expander("📘 Project Documentation (Concept & AI Logic)"):
+        st.info("This document explains the first conceptual code, AI logic, and decision workflow.")
+        st.markdown("📄 Upload your PDF as `docs/agrisense_documentation.pdf`")
+        try:
+            with open("docs/agrisense_documentation.pdf", "rb") as f:
+                st.download_button("⬇️ Download Documentation", f, "AgriSense_Documentation.pdf")
+        except:
+            st.warning("Documentation file not found.")
 
     st.markdown("---")
 
@@ -65,36 +80,45 @@ def intro_page():
     with col1:
         st.markdown("### 🚜 Project Idea")
         st.write("""
-        AgriSense Morocco is a smart agriculture decision-support platform
-        designed to help farmers and stakeholders make **informed,
-        sustainable decisions**.
-
-        The system uses AI to analyze agro-environmental indicators
-        such as climate conditions and vegetation behavior,
-        transforming them into **clear recommendations** for crop selection,
-        irrigation strategy, and risk management.
+        AgriSense Morocco transforms environmental indicators into
+        **AI-based agricultural decisions**, helping farmers adapt
+        to climate stress and regional constraints.
         """)
 
         st.markdown("### 🎯 Objectives")
         st.markdown("""
-        - Support sustainable farming under climate stress  
-        - Reduce water and resource waste  
-        - Enable data-driven agricultural planning  
-        - Make AI accessible to farmers and cooperatives  
+        - Sustainable agriculture  
+        - Water optimization  
+        - Regional decision-making  
+        - AI accessibility  
         """)
 
     with col2:
         st.markdown("### 🇲🇦 Why Morocco?")
         st.write("""
-        Morocco faces:
-        - Water scarcity  
-        - Climate variability  
-        - Regional agricultural diversity  
-
-        AgriSense Morocco is designed to **adapt decisions to regional realities**.
+        Morocco faces strong climate variability and water scarcity.
+        AgriSense adapts AI recommendations to **regional agricultural realities**.
         """)
 
     st.markdown("---")
+
+    # 🗺️ Morocco Map
+    st.markdown("### 🗺️ Agricultural Regions Overview")
+    m = folium.Map(location=[31.8, -7.1], zoom_start=6)
+
+    regions = {
+        "Souss-Massa": [30.4, -9.6],
+        "Gharb": [34.3, -6.3],
+        "Saïss": [34.0, -4.9],
+        "Haouz": [31.6, -8.0],
+        "Oriental": [34.6, -2.9],
+        "Draa-Tafilalet": [31.9, -5.5]
+    }
+
+    for r, coord in regions.items():
+        folium.Marker(coord, popup=r).add_to(m)
+
+    st_folium(m, height=400, width=700)
 
     if st.button("🚀 Launch Dashboard"):
         st.session_state.page = "dashboard"
@@ -105,7 +129,8 @@ def intro_page():
 # =====================================================
 def dashboard_page():
 
-    st.sidebar.title("🌍 Select Region")
+    st.sidebar.title("🌍 Configuration")
+
     region = st.sidebar.selectbox(
         "Moroccan Region",
         ["Souss-Massa", "Gharb", "Saïss", "Haouz", "Oriental", "Draa-Tafilalet"]
@@ -116,25 +141,33 @@ def dashboard_page():
         ["Wheat", "Olives", "Tomatoes", "Citrus", "Dates"]
     )
 
+    if st.sidebar.button("🔄 Update Weather Data"):
+        st.session_state.refresh_weather += 1
+
+    if st.sidebar.button("🔄 Update NDVI"):
+        st.session_state.refresh_ndvi += 1
+
     if st.sidebar.button("⬅ Back"):
         st.session_state.page = "intro"
         st.rerun()
 
-    # ---------------- Simulated Indicators ----------------
-    np.random.seed(len(region))
+    # ---------------- Simulated Data ----------------
+    np.random.seed(len(region) + st.session_state.refresh_weather)
     temperature = np.random.uniform(10, 35)
     rainfall = np.random.uniform(0, 50)
+
+    np.random.seed(len(region) + st.session_state.refresh_ndvi)
     ndvi = np.clip(np.random.normal(0.55, 0.1), 0.25, 0.85)
 
     # ---------------- Metrics ----------------
     m1, m2, m3 = st.columns(3)
     m1.metric("🌡 Temperature", f"{temperature:.1f} °C")
     m2.metric("🌧 Rainfall", f"{rainfall:.1f} mm")
-    m3.metric("🌿 Vegetation Index", f"{ndvi:.2f}")
+    m3.metric("🌿 Vegetation Index (NDVI)", f"{ndvi:.2f}")
 
     st.markdown("---")
 
-    # ---------------- AI Model (Demo Logic) ----------------
+    # ---------------- AI Model ----------------
     data = pd.DataFrame({
         "temp": np.linspace(temperature-5, temperature+5, 6),
         "rain": np.linspace(max(rainfall-20,0), rainfall+20, 6),
@@ -150,8 +183,8 @@ def dashboard_page():
     y_crop = le_crop.fit_transform(data["crop"])
     y_irr = le_irr.fit_transform(data["irrigation"])
 
-    crop_model = RandomForestClassifier(n_estimators=150, random_state=42)
-    irr_model = RandomForestClassifier(n_estimators=150, random_state=42)
+    crop_model = RandomForestClassifier(n_estimators=120)
+    irr_model = RandomForestClassifier(n_estimators=120)
 
     crop_model.fit(X, y_crop)
     irr_model.fit(X, y_irr)
@@ -160,49 +193,47 @@ def dashboard_page():
     crop_pred = le_crop.inverse_transform(crop_model.predict(X_input))[0]
     irr_pred = le_irr.inverse_transform(irr_model.predict(X_input))[0]
 
-    # ---------------- Results ----------------
     st.success(f"🌾 Recommended Crop: **{crop_pred}**")
-    st.info(f"💧 Suggested Irrigation Level: **{irr_pred}**")
+    st.info(f"💧 Suggested Irrigation: **{irr_pred}**")
 
-    # ---------------- Risk Alerts ----------------
-    risks = []
-    if rainfall < 10:
-        risks.append("Drought risk")
-    if temperature > 32:
-        risks.append("Heat stress risk")
-    if ndvi < 0.35:
-        risks.append("Low vegetation health")
-
-    if risks:
-        st.warning("⚠️ Risks detected: " + ", ".join(risks))
-    else:
-        st.success("✅ No major agricultural risks detected")
-
-    # ---------------- Suitability Chart ----------------
+    # ---------------- Chart ----------------
     probs = crop_model.predict_proba(X_input)[0]
-
-    fig = go.Figure(
-        go.Bar(
-            x=le_crop.classes_,
-            y=probs,
-            marker_color="#6B8E23"
-        )
-    )
-    fig.update_layout(
-        title="Crop Suitability (AI-Estimated)",
-        yaxis_title="Probability"
-    )
-
+    fig = go.Figure(go.Bar(x=le_crop.classes_, y=probs))
+    fig.update_layout(title="Crop Suitability (AI Estimated)")
     st.plotly_chart(fig, use_container_width=True)
 
     # ---------------- AI Insight ----------------
     st.markdown("### 🤖 AI Insight")
     st.write(f"""
-    For **{region}**, the current agro-environmental conditions indicate that
-    **{crop_pred}** is the most suitable option under existing climate pressure.
-    The system recommends **{irr_pred.lower()} irrigation**
-    to balance productivity and sustainability.
+    In **{region}**, AI analysis suggests **{crop_pred}** as the optimal crop
+    under current environmental pressure, with **{irr_pred.lower()} irrigation**
+    to enhance sustainability.
     """)
+
+    # ---------------- PDF REPORT ----------------
+    if st.button("📄 Generate AI Report"):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0,10,f"AgriSense Morocco Report – {region}", ln=True)
+        pdf.ln(5)
+        pdf.multi_cell(0,10,
+            f"Temperature: {temperature:.1f} °C\n"
+            f"Rainfall: {rainfall:.1f} mm\n"
+            f"NDVI: {ndvi:.2f}\n\n"
+            f"Recommended Crop: {crop_pred}\n"
+            f"Irrigation Level: {irr_pred}"
+        )
+        pdf.output("AgriSense_Report.pdf")
+        st.download_button("⬇️ Download Report", open("AgriSense_Report.pdf","rb"), "AgriSense_Report.pdf")
+
+    st.markdown("---")
+
+    # ---------------- QR CODE ----------------
+    st.markdown("### 🔗 Access AgriSense Morocco")
+    qr = qrcode.make("https://agrisense-morocco.streamlit.app")
+    qr.save("qr.png")
+    st.image("qr.png", width=160, caption="Scan to access the platform")
 
 # =====================================================
 # ROUTER
@@ -211,3 +242,4 @@ if st.session_state.page == "intro":
     intro_page()
 else:
     dashboard_page()
+
