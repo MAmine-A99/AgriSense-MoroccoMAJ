@@ -2,243 +2,165 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder
-import folium
-from streamlit_folium import st_folium
 from fpdf import FPDF
-import qrcode
 
-# =====================================================
-# PAGE CONFIG
-# =====================================================
+# ------------------ PAGE CONFIG ------------------
 st.set_page_config(
     page_title="AgriSense Morocco",
     page_icon="🌱",
     layout="wide"
 )
 
-# =====================================================
-# GLOBAL STYLE (Apple-like)
-# =====================================================
-st.markdown("""
-<style>
-* {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                 Roboto, Helvetica, Arial, sans-serif !important;
-}
-.stButton>button {
-    border-radius: 16px;
-    height: 52px;
-    font-size: 18px;
-    background-color: #D97706;
-    color: white;
-}
-</style>
-""", unsafe_allow_html=True)
+# ------------------ SIDEBAR ------------------
+st.sidebar.title("AgriSense Morocco")
+page = st.sidebar.radio("Navigation", ["Intro", "Dashboard"])
 
-# =====================================================
-# SESSION STATE
-# =====================================================
-if "page" not in st.session_state:
-    st.session_state.page = "intro"
-
-if "refresh_weather" not in st.session_state:
-    st.session_state.refresh_weather = 0
-
-if "refresh_ndvi" not in st.session_state:
-    st.session_state.refresh_ndvi = 0
-
-# =====================================================
-# INTRO PAGE
-# =====================================================
+# ------------------ INTRO PAGE ------------------
 def intro_page():
-
+    st.markdown("## 🌱 AgriSense Morocco")
     st.markdown("""
-    <h1 style='text-align:center; color:#D97706;'>🌱 AgriSense Morocco</h1>
-    <h3 style='text-align:center; color:#6B8E23;'>
-    AI-Driven Decision Support for Sustainable Agriculture
-    </h3>
-    """, unsafe_allow_html=True)
+**AgriSense Morocco** is an AI-powered decision support system for sustainable agriculture.
+
+It leverages:
+- Climate indicators
+- Vegetation indices (NDVI)
+- AI-driven recommendations  
+
+to help **farmers, agronomists, and policymakers** make climate-resilient decisions.
+""")
+
+    st.markdown("### Key Features")
+    st.markdown("""
+- Crop recommendation  
+- Smart irrigation strategy  
+- Sustainability-oriented insights  
+- Morocco-focused regional analysis  
+""")
+
+# ------------------ DASHBOARD PAGE ------------------
+def dashboard_page():
+    st.markdown("## 📊 Agricultural Decision Dashboard")
+
+    # ----------- REGION SELECTION -----------
+    region = st.selectbox(
+        "Select Moroccan Agricultural Region",
+        [
+            "Souss-Massa",
+            "Gharb",
+            "Saïss",
+            "Haouz",
+            "Oriental",
+            "Draa-Tafilalet"
+        ]
+    )
+
+    # ----------- FAKE BUT REALISTIC DATA -----------
+    temperature = np.random.uniform(15, 35)
+    rainfall = np.random.uniform(5, 80)
+    ndvi = np.random.uniform(0.25, 0.80)
+
+    # ----------- AI LOGIC (RULE-BASED DEMO) -----------
+    if ndvi > 0.6:
+        crop_pred = "Vegetables / Citrus"
+    elif ndvi > 0.4:
+        crop_pred = "Cereals"
+    else:
+        crop_pred = "Olive / Date Palm"
+
+    if rainfall < 20:
+        irr_pred = "High irrigation required"
+    elif rainfall < 50:
+        irr_pred = "Moderate irrigation"
+    else:
+        irr_pred = "Low irrigation required"
+
+    # ----------- KPI METRICS -----------
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Temperature (C)", f"{temperature:.1f}")
+    col2.metric("Rainfall (mm)", f"{rainfall:.1f}")
+    col3.metric("NDVI Index", f"{ndvi:.2f}")
 
     st.markdown("---")
 
-    # 📘 Documentation
-    with st.expander("📘 Project Documentation (Concept & AI Logic)"):
-        st.info("This document explains the first conceptual code, AI logic, and decision workflow.")
-        st.markdown("📄 Upload your PDF as `docs/agrisense_documentation.pdf`")
-        try:
-            with open("docs/agrisense_documentation.pdf", "rb") as f:
-                st.download_button("⬇️ Download Documentation", f, "AgriSense_Documentation.pdf")
-        except:
-            st.warning("Documentation file not found.")
-
-    st.markdown("---")
-
-    col1, col2 = st.columns([2,1])
-
-    with col1:
-        st.markdown("### 🚜 Project Idea")
-        st.write("""
-        AgriSense Morocco transforms environmental indicators into
-        **AI-based agricultural decisions**, helping farmers adapt
-        to climate stress and regional constraints.
-        """)
-
-        st.markdown("### 🎯 Objectives")
-        st.markdown("""
-        - Sustainable agriculture  
-        - Water optimization  
-        - Regional decision-making  
-        - AI accessibility  
-        """)
-
-    with col2:
-        st.markdown("### 🇲🇦 Why Morocco?")
-        st.write("""
-        Morocco faces strong climate variability and water scarcity.
-        AgriSense adapts AI recommendations to **regional agricultural realities**.
-        """)
-
-    st.markdown("---")
-
-    # 🗺️ Morocco Map
-    st.markdown("### 🗺️ Agricultural Regions Overview")
-    m = folium.Map(location=[31.8, -7.1], zoom_start=6)
-
-    regions = {
-        "Souss-Massa": [30.4, -9.6],
-        "Gharb": [34.3, -6.3],
-        "Saïss": [34.0, -4.9],
-        "Haouz": [31.6, -8.0],
-        "Oriental": [34.6, -2.9],
-        "Draa-Tafilalet": [31.9, -5.5]
+    # ---------------- MAP ----------------
+    region_coords = {
+        "Souss-Massa": (30.4, -9.6),
+        "Gharb": (34.3, -6.3),
+        "Saïss": (34.0, -4.9),
+        "Haouz": (31.6, -8.0),
+        "Oriental": (34.6, -2.9),
+        "Draa-Tafilalet": (31.9, -5.5)
     }
 
-    for r, coord in regions.items():
-        folium.Marker(coord, popup=r).add_to(m)
+    lat, lon = region_coords[region]
 
-    st_folium(m, height=400, width=700)
-
-    if st.button("🚀 Launch Dashboard"):
-        st.session_state.page = "dashboard"
-        st.rerun()
-
-# =====================================================
-# DASHBOARD PAGE
-# =====================================================
-def dashboard_page():
-
-    st.sidebar.title("🌍 Configuration")
-
-    region = st.sidebar.selectbox(
-        "Moroccan Region",
-        ["Souss-Massa", "Gharb", "Saïss", "Haouz", "Oriental", "Draa-Tafilalet"]
-    )
-
-    crop = st.sidebar.selectbox(
-        "Crop of Interest",
-        ["Wheat", "Olives", "Tomatoes", "Citrus", "Dates"]
-    )
-
-    if st.sidebar.button("🔄 Update Weather Data"):
-        st.session_state.refresh_weather += 1
-
-    if st.sidebar.button("🔄 Update NDVI"):
-        st.session_state.refresh_ndvi += 1
-
-    if st.sidebar.button("⬅ Back"):
-        st.session_state.page = "intro"
-        st.rerun()
-
-    # ---------------- Simulated Data ----------------
-    np.random.seed(len(region) + st.session_state.refresh_weather)
-    temperature = np.random.uniform(10, 35)
-    rainfall = np.random.uniform(0, 50)
-
-    np.random.seed(len(region) + st.session_state.refresh_ndvi)
-    ndvi = np.clip(np.random.normal(0.55, 0.1), 0.25, 0.85)
-
-    # ---------------- Metrics ----------------
-    m1, m2, m3 = st.columns(3)
-    m1.metric("🌡 Temperature", f"{temperature:.1f} °C")
-    m2.metric("🌧 Rainfall", f"{rainfall:.1f} mm")
-    m3.metric("🌿 Vegetation Index (NDVI)", f"{ndvi:.2f}")
-
-    st.markdown("---")
-
-    # ---------------- AI Model ----------------
-    data = pd.DataFrame({
-        "temp": np.linspace(temperature-5, temperature+5, 6),
-        "rain": np.linspace(max(rainfall-20,0), rainfall+20, 6),
-        "ndvi": np.linspace(ndvi-0.1, ndvi+0.1, 6),
-        "crop": ["Wheat","Olives","Tomatoes","Citrus","Dates","Wheat"],
-        "irrigation": ["High","Low","High","Medium","Low","High"]
+    map_df = pd.DataFrame({
+        "lat": [lat],
+        "lon": [lon],
+        "region": [region]
     })
 
-    X = data[["temp","rain","ndvi"]]
-    le_crop = LabelEncoder()
-    le_irr = LabelEncoder()
+    fig_map = go.Figure(go.Scattermapbox(
+        lat=map_df["lat"],
+        lon=map_df["lon"],
+        mode="markers",
+        marker=dict(size=16),
+        text=map_df["region"]
+    ))
 
-    y_crop = le_crop.fit_transform(data["crop"])
-    y_irr = le_irr.fit_transform(data["irrigation"])
+    fig_map.update_layout(
+        mapbox_style="open-street-map",
+        mapbox_zoom=5,
+        mapbox_center={"lat": 31.5, "lon": -7.5},
+        margin={"l": 0, "r": 0, "t": 0, "b": 0},
+        height=420
+    )
 
-    crop_model = RandomForestClassifier(n_estimators=120)
-    irr_model = RandomForestClassifier(n_estimators=120)
+    st.markdown("### 🗺️ Selected Agricultural Region")
+    st.plotly_chart(fig_map, use_container_width=True)
 
-    crop_model.fit(X, y_crop)
-    irr_model.fit(X, y_irr)
+    # ----------- AI RECOMMENDATIONS -----------
+    st.markdown("### 🤖 AI Recommendations")
+    st.markdown(f"""
+- **Recommended Crop:** {crop_pred}  
+- **Irrigation Strategy:** {irr_pred}  
+""")
 
-    X_input = pd.DataFrame([[temperature, rainfall, ndvi]], columns=X.columns)
-    crop_pred = le_crop.inverse_transform(crop_model.predict(X_input))[0]
-    irr_pred = le_irr.inverse_transform(irr_model.predict(X_input))[0]
+    # ----------- PDF GENERATION (SAFE) -----------
+    st.markdown("---")
+    st.markdown("### 📄 AI-Generated Report")
 
-    st.success(f"🌾 Recommended Crop: **{crop_pred}**")
-    st.info(f"💧 Suggested Irrigation: **{irr_pred}**")
-
-    # ---------------- Chart ----------------
-    probs = crop_model.predict_proba(X_input)[0]
-    fig = go.Figure(go.Bar(x=le_crop.classes_, y=probs))
-    fig.update_layout(title="Crop Suitability (AI Estimated)")
-    st.plotly_chart(fig, use_container_width=True)
-
-    # ---------------- AI Insight ----------------
-    st.markdown("### 🤖 AI Insight")
-    st.write(f"""
-    In **{region}**, AI analysis suggests **{crop_pred}** as the optimal crop
-    under current environmental pressure, with **{irr_pred.lower()} irrigation**
-    to enhance sustainability.
-    """)
-
-    # ---------------- PDF REPORT ----------------
-    if st.button("📄 Generate AI Report"):
+    if st.button("Generate Report"):
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
-        pdf.cell(0,10,f"AgriSense Morocco Report – {region}", ln=True)
-        pdf.ln(5)
-        pdf.multi_cell(0,10,
-            f"Temperature: {temperature:.1f} °C\n"
+
+        report_text = (
+            "AgriSense Morocco - AI Agriculture Report\n\n"
+            f"Region: {region}\n"
+            f"Temperature: {temperature:.1f} C\n"
             f"Rainfall: {rainfall:.1f} mm\n"
-            f"NDVI: {ndvi:.2f}\n\n"
+            f"NDVI Index: {ndvi:.2f}\n\n"
             f"Recommended Crop: {crop_pred}\n"
-            f"Irrigation Level: {irr_pred}"
+            f"Irrigation Strategy: {irr_pred}\n\n"
+            "Insight:\n"
+            "This report is generated using an AI-based\n"
+            "decision support system tailored for Morocco."
         )
+
+        pdf.multi_cell(0, 8, report_text)
         pdf.output("AgriSense_Report.pdf")
-        st.download_button("⬇️ Download Report", open("AgriSense_Report.pdf","rb"), "AgriSense_Report.pdf")
 
-    st.markdown("---")
+        with open("AgriSense_Report.pdf", "rb") as f:
+            st.download_button(
+                "Download PDF Report",
+                f,
+                file_name="AgriSense_Report.pdf",
+                mime="application/pdf"
+            )
 
-    # ---------------- QR CODE ----------------
-    st.markdown("### 🔗 Access AgriSense Morocco")
-    qr = qrcode.make("https://agrisense-morocco.streamlit.app")
-    qr.save("qr.png")
-    st.image("qr.png", width=160, caption="Scan to access the platform")
-
-# =====================================================
-# ROUTER
-# =====================================================
-if st.session_state.page == "intro":
+# ------------------ PAGE ROUTING ------------------
+if page == "Intro":
     intro_page()
 else:
     dashboard_page()
