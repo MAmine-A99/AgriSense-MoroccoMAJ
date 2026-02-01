@@ -12,7 +12,7 @@ import qrcode
 # =====================================================
 # PAGE CONFIG
 # =====================================================
-st.set_page_config(page_title="AgriSense Morocco", layout="wide", page_icon="🌱")
+st.set_page_config(page_title="GreenLife Morocco", layout="wide", page_icon="🌱")
 
 # =====================================================
 # GLOBAL STYLE
@@ -41,7 +41,7 @@ def intro_page():
     # Hero title + subtitle
     st.markdown("""
     <div style="text-align:center;">
-        <h1 style='color:#D97706; font-size:50px;'>🌱 AgriSense Morocco</h1>
+        <h1 style='color:#D97706; font-size:50px;'>🌱 GreenLife Morocco</h1>
         <h3 style='color:#6B8E23;'>AI-powered Sustainable Agriculture Decision Support</h3>
         <p style='color:#6B8E23; font-size:16px;'>
         Powered by <b>Mohamed Amine Jaghouti</b> • <a href="mailto:Mohamedaminejaghouti@gmail.com">Email</a>
@@ -53,10 +53,10 @@ def intro_page():
     col1, col2 = st.columns([2,1])
 
     with col1:
-        st.markdown("### 🚜 About AgriSense Morocco")
+        st.markdown("### 🚜 About GreenLife Morocco")
         st.write("""
         Morocco faces unpredictable weather, water scarcity, and crop management challenges.
-        AgriSense Morocco provides a **smart solution**, combining:
+        GreenLife Morocco provides a **smart solution**, combining:
         - AI-driven crop and irrigation recommendations
         - Real-time weather data
         - Satellite-inspired NDVI vegetation monitoring
@@ -66,7 +66,7 @@ def intro_page():
 
         st.markdown("### 🔬 Scientific & Research Basis")
         st.write("""
-        AgriSense Morocco integrates **AI, IoT, and precision farming techniques**.
+        GreenLife Morocco integrates **AI, IoT, and precision farming techniques**.
         Key foundations:
         - **AI & Predictive Analytics:** Recommend crops and irrigation based on weather, NDVI, and soil indicators.
         - **NDVI Monitoring:** Satellite-based vegetation health for early stress detection.
@@ -74,11 +74,11 @@ def intro_page():
         - **Future IoT Compatibility:** Ready to integrate RF-based soil sensing (Strobe technology) and IoT sensors.
         - **Sustainability:** Reduces water and fertilizer waste, promotes climate-resilient crops.
         """)
-        st.write("AgriSense Morocco bridges academic research and real Moroccan farming needs, making advanced farming accessible and actionable.")
+        st.write("GreenLife Morocco bridges academic research and real Moroccan farming needs, making advanced farming accessible and actionable.")
 
     with col2:
         st.markdown("### 📄 Project Documentation")
-        st.markdown("[📘 Download PDF Overview](https://drive.google.com/uc?export=download&id=1F8USlTvi2hP01RwpBTJNaTIczRovVlLU)", unsafe_allow_html=True)
+        st.markdown("[📘 Download PDF Overview](https://drive.google.com/file/d/1az5AZEWU30kDGnJXR6C4JvkP1ngdbbwO/view?usp=sharing)", unsafe_allow_html=True)
 
     st.markdown("---")
     col_btn = st.columns([1,2,1])[1]
@@ -188,7 +188,7 @@ def dashboard_page():
     def generate_pdf():
         buffer = BytesIO()
         c = canvas.Canvas(buffer)
-        c.drawString(50,800,"AgriSense Morocco Report")
+        c.drawString(50,800,"GreenLife Morocco Report")
         y = 760
         for line in [
             f"Region: {city_name}",
@@ -204,7 +204,7 @@ def dashboard_page():
         return buffer
 
     if st.button("📄 Export PDF Report"):
-        st.download_button("Download PDF", generate_pdf(), file_name=f"AgriSense_{city_name}.pdf", mime="application/pdf")
+        st.download_button("Download PDF", generate_pdf(), file_name=f"GreenLife_{city_name}.pdf", mime="application/pdf")
 
     # ---------------- QR ----------------
     APP_URL = "https://agrisense-moroccomaj-nngj5uc898kzkk7ae4j9go.streamlit.app/"
@@ -212,7 +212,7 @@ def dashboard_page():
     buf = BytesIO()
     qr.save(buf)
     buf.seek(0)
-    st.markdown("### 📱 Scan to open AgriSense Morocco")
+    st.markdown("### 📱 Scan to open GreenLife Morocco")
     st.image(buf,width=160)
 
 # =====================================================
@@ -222,4 +222,3 @@ if st.session_state.page=="intro":
     intro_page()
 else:
     dashboard_page()
-
