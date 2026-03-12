@@ -23,19 +23,16 @@ st.markdown("""
 
 # ==================== SESSION STATE ====================
 if "page" not in st.session_state: st.session_state.page = "intro"
-if "marker" not in st.session_state: st.session_state.marker = {"lat": 35.77, "lon": -5.8}
+if "marker" not in st.session_state: st.session_state.marker = {"lat": 35.77, "lon": -5.8}  # Tangier agricultural zone
 if "weather" not in st.session_state: st.session_state.weather = {"temp": 25, "humidity": 50, "rain": 2}
 if "city_name" not in st.session_state: st.session_state.city_name = "Unknown"
 
-API_KEY = "01aff74fe8d0fb3777a72ba49c7a3a8f"
+API_KEY = "01aff74fe8d0fb3777a72ba49c7a3a8f"  # New OpenWeather API key
 
 # ==================== DATA FUNCTIONS ====================
 def get_weather(lat, lon, api_key):
     try:
-        r = requests.get(
-            f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={api_key}",
-            timeout=10
-        )
+        r = requests.get(f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={api_key}", timeout=10)
         data = r.json()
         temp = data["main"]["temp"]
         humidity = data["main"]["humidity"]
@@ -78,8 +75,10 @@ def intro():
         <p style='color:#6B8E23; font-size:16px;'>Powered by <b>GreenLife Team</b> • <a href='mailto:Mohamedaminejaghouti@gmail.com'>Email</a></p>
     </div>
     """, unsafe_allow_html=True)
+
     st.markdown("---")
     col1, col2 = st.columns([2,1])
+
     with col1:
         st.markdown("### 🚜 About GreenLife Morocco")
         st.write("""
@@ -97,9 +96,11 @@ def intro():
         - Soil Chemistry Analysis
         - Sustainable & Climate-smart Practices
         """)
+
     with col2:
         st.markdown("### 📄 Project Documentation")
         st.markdown("[📘 Download PDF Overview](https://drive.google.com)")
+
     st.markdown("---")
     if st.button("🚀 Launch Dashboard"):
         st.session_state.page = "dashboard"
@@ -110,12 +111,15 @@ def dashboard():
     st.sidebar.title("📍 Select Agricultural Region")
     lat = st.sidebar.number_input("Latitude", 21.0, 36.0, st.session_state.marker["lat"])
     lon = st.sidebar.number_input("Longitude", -17.0, -1.0, st.session_state.marker["lon"])
+
     if st.sidebar.button("Set Region"):
         st.session_state.marker = {"lat": lat, "lon": lon}
         st.session_state.weather = {"temp": 25, "humidity": 50, "rain": 2}
+
     if st.sidebar.button("⬅ Back to Intro"):
         st.session_state.page = "intro"
         st.rerun()
+
     lat, lon = st.session_state.marker["lat"], st.session_state.marker["lon"]
 
     # ---------------- MAP ----------------
@@ -170,6 +174,7 @@ def dashboard():
     s1.metric("Organic Carbon", soil_carbon)
     s2.metric("Clay %", soil_clay)
     s3.metric("pH", soil_ph)
+
     soil_alert=""
     if soil_ph<6: soil_alert+="⚠️ Acidic soil detected. Lime treatment recommended. "
     if soil_ph>8: soil_alert+="⚠️ Alkaline soil detected. "
@@ -177,15 +182,18 @@ def dashboard():
     if soil_alert: st.warning(soil_alert)
 
     # ---------------- AI CROP RECOMMENDATION ----------------
-    df = pd.DataFrame({
-        "temperature":[18,22,26,30,24,20,28],
-        "rainfall":[600,400,120,80,300,350,150],
-        "ndvi":[0.75,0.65,0.55,0.45,0.60,0.62,0.50],
-        "soil_ph":[6.5,7.2,6.8,7.5,7.0,6.7,7.3],
-        "soil_carbon":[20,18,15,12,17,19,14],
-        "soil_clay":[30,25,18,15,22,28,20],
-        "crop":["wheat","olives","tomatoes","citrus","grapes","almonds","vegetables"],
-        "irrigation":["low","low","high","medium","medium","low","high"]
+    crops=["wheat","olives","tomatoes","citrus","grapes","almonds","vegetables"]
+    irrigation=["low","low","high","medium","medium","low","high"]
+
+    df=pd.DataFrame({
+        "temperature": np.linspace(temp-3, temp+3, len(crops)),
+        "rainfall": np.linspace(max(rain-5,0), rain+5, len(crops)),
+        "ndvi": np.linspace(ndvi-0.05, ndvi+0.05, len(crops)),
+        "soil_ph":[soil_ph]*len(crops),
+        "soil_carbon":[soil_carbon]*len(crops),
+        "soil_clay":[soil_clay]*len(crops),
+        "crop": crops,
+        "irrigation": irrigation
     })
 
     X = df[["temperature","rainfall","ndvi","soil_ph","soil_carbon","soil_clay"]]
@@ -249,3 +257,5 @@ if st.session_state.page=="intro":
     intro()
 else:
     dashboard()
+
+
